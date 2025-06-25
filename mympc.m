@@ -8,7 +8,7 @@
 % umin: inputs lower limit (scalar)
 % umax: inputs upper limit (scalar)
 % X: measured status at the current instant time
-function u = mympc(A,B,Q,R,S,N,umin,umax,x)
+function u = mympc(A,B,Q,R,S,N,umin,umax,u_bar,x)
     m=size(B,2);
     n=size(A,1);
     
@@ -39,16 +39,35 @@ function u = mympc(A,B,Q,R,S,N,umin,umax,x)
     F = Asig'*Qsig*Bsig;
     ft = x'*F;
     f=ft';
-
     %input and status constraints definition
-    lb = [repmat(umin, N*m,1)];
-    ub = [repmat(umax, N*m,1)];
+    lb = [repmat(umin-u_bar, N*m,1)];
+    ub = [repmat(umax-u_bar, N*m,1)];
+
+    xlim = 15;
+    u_bar_vec = repmat(u_bar, N, 1);
+    b_constraint = [ xlim*ones(N*n,1) - Asig*x - Bsig*u_bar_vec;
+                     xlim*ones(N*n,1) + Asig*x + Bsig*u_bar_vec ];
+     
+    A_constraint = [ Bsig;-Bsig ];
+
+    % xlim = 15;
+    % 
+    % A_constraint = [ Bsig; -Bsig ];
+    % b_constraint = [ xlim*ones(N*n,1) - Asig*x;
+    %              xlim*ones(N*n,1) + Asig*x ];
+
+
+    disp("b");
+    size(b_constraint)
+    disp("A")
+    size(A_constraint)
 
     options = optimset('Algorithm', 'interior-point-convex','Diagnostics','off', ...
         'Display','off');
     %solve the quadratic programming problem
-    U = quadprog(H,f,[],[],[],[],lb,ub,[],options);
-
+    U = quadprog(H,f,A_constraint,b_constraint,[],[],lb,ub,[],options);
+    %U = quadprog(H,f,[],[],[],[],lb,ub,[],options);
+    %U = quadprog(H,f,[],[],[],[],[],[],[],options);
     %get the optimal input value (the receding horizon principle is applied)
     u = U(1:m);
 end

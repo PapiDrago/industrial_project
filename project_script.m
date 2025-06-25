@@ -74,18 +74,25 @@ R = 1*eye(2);  % Penalizza l'uso eccessivo del controllo
 
 u_bar_c = -inv(B)*A*xref;
 [Kc,Sc,Pc] = lqr(A, B, Q, R);
-%eig_lqr = eig(A-B*Kc);
+eig_lqr = eig(A-B*Kc);
 %% === LQR DISCRETO ===
-Qd = 10*eye(2);
+Qd = 1*eye(2);
 Rd = 1*eye(2); 
+%Qd2 = 1000*eye(2);
+%Rd2= 1*eye(2); 
 N=5;
+N2=5;
+N3=100;
 
 u_bar_d = Bd\ (eye(size(Ad))-Ad)*xref;
 
 [Kd,Sd,Pd] = dlqr(Ad, Bd, Qd, Rd);
-%eig_lqr = eig(Ad-Bd*Kd);
+%[Kd2,Sd2,Pd2] = dlqr(Ad, Bd, Qd2, Rd);
+eig_lqr = eig(Ad-Bd*Kd);
 %open('regulator_LQ_project')
 %sim('regulator_LQ_project')
 %keyboard
 
 S0=zeros(2);
+
+%% Point 5
