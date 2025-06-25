@@ -76,7 +76,7 @@ u_bar_c = -inv(B)*A*xref;
 [Kc,Sc,Pc] = lqr(A, B, Q, R);
 eig_lqr = eig(A-B*Kc);
 %% === LQR DISCRETO ===
-Qd = 1*eye(2);
+Qd = 1000*eye(2);
 Rd = 1*eye(2); 
 %Qd2 = 1000*eye(2);
 %Rd2= 1*eye(2); 

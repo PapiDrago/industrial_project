@@ -8,7 +8,7 @@
 % umin: inputs lower limit (scalar)
 % umax: inputs upper limit (scalar)
 % X: measured status at the current instant time
-function u = mympc(A,B,Q,R,S,N,umin,umax,u_bar,x)
+function u = mympc(A,B,Q,R,S,N,umin,umax,u_bar,x_sat_max, x_sat_min,xref,x)
     m=size(B,2);
     n=size(A,1);
     
@@ -42,25 +42,45 @@ function u = mympc(A,B,Q,R,S,N,umin,umax,u_bar,x)
     %input and status constraints definition
     lb = [repmat(umin-u_bar, N*m,1)];
     ub = [repmat(umax-u_bar, N*m,1)];
-
+    
     xlim = 15;
-    u_bar_vec = repmat(u_bar, N, 1);
-    b_constraint = [ xlim*ones(N*n,1) - Asig*x - Bsig*u_bar_vec;
-                     xlim*ones(N*n,1) + Asig*x + Bsig*u_bar_vec ];
-     
-    A_constraint = [ Bsig;-Bsig ];
+    
+    %% Define input and status constraint
+
+    xl = repmat(x_sat_min-xref, N,1)
+    xu = repmat(x_sat_max-xref, N,1)
+
+    A_constraint = [Bsig; -Bsig];
+    b_constraint = [xu - Asig * x; -(xl - Asig * x)];
+
+
+
+
+
+
+
+
+    % xl = [repmat(x_sat_min-xref, N,1)]
+    % xu = [repmat(x_sat_max-xref, N,1)];
+    % 
+    % u_bar_vec = repmat(u_bar, N, 1);
+    % b_constraint = [ xu - Asig*x - Bsig*u_bar_vec;
+    %                   xl + Asig*x + Bsig*u_bar_vec ];
+    % 
+    % A_constraint = [ Bsig;-Bsig ];
+
+    % 
+    % u_bar_vec = repmat(u_bar, N, 1);
+    % b_constraint = [ xlim*ones(N*n,1) - Asig*x - Bsig*u_bar_vec;
+    %                  xlim*ones(N*n,1) + Asig*x + Bsig*u_bar_vec ];
+    % 
+    % A_constraint = [ Bsig;-Bsig ];
 
     % xlim = 15;
     % 
     % A_constraint = [ Bsig; -Bsig ];
     % b_constraint = [ xlim*ones(N*n,1) - Asig*x;
     %              xlim*ones(N*n,1) + Asig*x ];
-
-
-    disp("b");
-    size(b_constraint)
-    disp("A")
-    size(A_constraint)
 
     options = optimset('Algorithm', 'interior-point-convex','Diagnostics','off', ...
         'Display','off');
