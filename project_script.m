@@ -96,3 +96,19 @@ eig_lqr = eig(Ad-Bd*Kd);
 S0=zeros(2);
 
 %% Point 5
+
+%% Kalman filter
+B_noise=[Bd ones(size(Bd,1),1)];
+D_noise=[Dd zeros(size(Dd,1),1)];
+
+power_vx=0.00001;
+power_vy=0.00001;
+
+% set Kalman filter parameters
+QK=1*eye(2);        % variance of v_x, I set it big when I do not trust my model
+RK=1*eye(2);      % variance of v_y, I set it big when I trust my model,
+                    % the trade-off is that also make the estimation error
+%                   go to 0 slower
+NK=0;               % covariance v_x,v_y
+
+x0K=1.5*x0;         %initial guess for x0
