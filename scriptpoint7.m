@@ -76,8 +76,8 @@ u_bar_c = -inv(B)*A*xref;
 [Kc,Sc,Pc] = lqr(A, B, Q, R);
 eig_lqr = eig(A-B*Kc);
 %% === LQR DISCRETO ===
-Qd = 1*eye(2);
-Rd = 1000*eye(2); 
+Qd = 1000*eye(2);
+Rd = 1*eye(2); 
 %Qd2 = 1000*eye(2);
 %Rd2= 1*eye(2); 
 N=5;
@@ -105,7 +105,7 @@ power_vx=0.00001;
 power_vy=0.00001;
 
 % set Kalman filter parameters
-QK=1*eye(2);        % variance of v_x, I set it big when I do not trust my model
+QK=100000*eye(2);        % variance of v_x, I set it big when I do not trust my model
 RK=1*eye(2);      % variance of v_y, I set it big when I trust my model,
                     % the trade-off is that also make the estimation error
 %                   go to 0 slower
@@ -114,4 +114,21 @@ NK=0;               % covariance v_x,v_y
 x0K=1.5*x0;         %initial guess for x0
 
 %% Point 7
+Lq_real = 0.013;
+Ld_real = 0.06;
 
+% === MATRICE A ===
+A = [-Rs/Ld_real,     we*Lq_real/Ld_real;
+     -we*Ld_real/Lq_real,  -Rs/Lq_real];
+
+% === MATRICE B ===
+B = [1/Ld_real,     0;
+     0,        1/Lq_real];
+
+sys_c = ss(A, B, C, D);
+sys_d = c2d(sys_c, Ts);
+
+[Ad_real, Bd_real, Cd_real, Dd_real] = ssdata(sys_d);
+
+B_noise_real=[Bd ones(size(Bd,1),1)];
+D_noise_real=[Dd zeros(size(Dd,1),1)];
